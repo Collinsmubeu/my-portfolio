@@ -1,65 +1,64 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const Projects = () => {
-  const projects = [
-    {
-      title: 'Pizzara',
-      description: 'A responsive pizza restaurant menu and ordering interface. Features include dynamic menu rendering and cart functionality.',
-      tech: ['HTML', 'CSS', 'JavaScript'],
-      repoLink: 'https://github.com/Collinsmubeu/pizzara',
-      liveLink: '#',
-    },
-    {
-      title: 'Play',
-      description: 'A clean, open-source web template designed for startups and portfolios. Focuses on speed and minimalism.',
-      tech: ['HTML', 'CSS', 'React'],
-      repoLink: 'https://github.com/Collinsmubeu/play',
-      liveLink: '#',
-    },
-    {
-      title: 'My Portfolio',
-      description: 'The personal portfolio website you are building right now. Showcases skills, about me, and project history.',
-      tech: ['React', 'Vite', 'ESLint'],
-      repoLink: 'https://github.com/Collinsmubeu/my-portfolio',
-      liveLink: '#',
-    },
-    {
-      title: 'Project Four',
-      description: 'Description of your next big project goes here. Update this card as you build new things.',
-      tech: ['React', 'Node.js'],
-      repoLink: '#',
-      liveLink: '#',
-    },
-  ];
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('https://api.github.com/users/Collinsmubeu/repos?sort=updated&direction=desc');
+        const data = await response.json();
+        const filtered = data.filter(repo => !repo.fork && repo.name !== 'Collinsmubeu.github.io');
+        setProjects(filtered.slice(0, 6));
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="projects" style={styles.section}>
+        <h2 style={styles.title}>Some Things I've Built</h2>
+        <p style={{ textAlign: 'center', color: '#8892b0' }}>Loading projects from GitHub...</p>
+      </section>
+    );
+  }
 
   return (
     <section id="projects" style={styles.section}>
       <h2 style={styles.title}>Some Things I've Built</h2>
       
       <div style={styles.grid}>
-        {projects.map((project, index) => (
-          <div key={index} style={styles.card}>
+        {projects.map((project) => (
+          <div key={project.id} style={styles.card}>
             <div style={styles.cardHeader}>
-              <h3 style={styles.cardTitle}>{project.title}</h3>
+              <h3 style={styles.cardTitle}>{project.name}</h3>
               <div style={styles.links}>
-                {project.repoLink !== '#' && (
-                  <a href={project.repoLink} target="_blank" rel="noopener noreferrer" style={styles.iconLink} title="View Code">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                  </a>
-                )}
-                {project.liveLink !== '#' && (
-                  <a href={project.liveLink} target="_blank" rel="noopener noreferrer" style={styles.iconLink} title="View Live">
+                <a href={project.html_url} target="_blank" rel="noopener noreferrer" style={styles.iconLink} title="View Code">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                </a>
+                {project.homepage && (
+                  <a href={project.homepage} target="_blank" rel="noopener noreferrer" style={styles.iconLink} title="View Live">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                   </a>
                 )}
               </div>
             </div>
             
-            <p style={styles.cardDesc}>{project.description}</p>
+            <p style={styles.cardDesc}>
+              {project.description || "A project built with modern web technologies."}
+            </p>
             
             <ul style={styles.techList}>
-              {project.tech.map((tech, i) => (
-                <li key={i} style={styles.techItem}>{tech}</li>
+              {project.language && <li style={styles.techItem}>{project.language}</li>}
+              {project.topics && project.topics.slice(0, 2).map((topic, i) => (
+                <li key={i} style={styles.techItem}>{topic}</li>
               ))}
             </ul>
           </div>
